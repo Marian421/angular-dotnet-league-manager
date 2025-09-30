@@ -1,10 +1,16 @@
 using DotNetEnv;
+using backend.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 // Console.WriteLine($"Variable is: {connectionString}");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
 // Add services to the container.
 
 builder.Services.AddControllers();
