@@ -2,9 +2,14 @@ namespace backend.Models
 {
     public class User
     {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string Role { get; set; }
+
+        public Player PlayerProfile { get; set; }
+        public Team TeamCoached { get; set; } // if this user is a coach
         
     }
 }
