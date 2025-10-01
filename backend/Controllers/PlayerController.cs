@@ -17,31 +17,31 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Match>> GetMatches()
+        public ActionResult<IEnumerable<Player>> GetPlayers()
         {
-            return _context.Matches.ToList();
+            return _context.Players.ToList();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Match> GetMatch(int id)
+        public ActionResult<Player> GetPlayer(int id)
         {
-            var match = _context.Matches.Find(id);
+            var player = _context.Players.Find(id);
 
-            if (match == null)
+            if (player == null)
             {
                 return NotFound();
             }
 
-            return match;
+            return player;
         }
 
         [HttpPost]
-        public ActionResult<Match> CreateMatch(Match match)
+        public ActionResult<Player> Createplayer(Player player)
         {
-            _context.Matches.Add(match);
+            _context.Players.Add(player);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetMatch), new { id = match.Id }, match);
+            return CreatedAtAction(nameof(GetPlayer), new { id = player.Id }, player);
         }
     }
 }
