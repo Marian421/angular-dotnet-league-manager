@@ -135,3 +135,10 @@
 /home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/zh-Hans/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/Microsoft.Extensions.ObjectPool.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/Microsoft.Extensions.WebEncoders.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/System.Security.Cryptography.Pkcs.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/System.Security.Cryptography.Xml.dll
+/home/marian/repos/angular-dotnet-league-manager/backend/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll
