@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iCRlmtSTU2JUzY7sJ1iXNtZ16tbhmWF6rYyeKspEn2zpzgDer9SR8MSzDZHL6SxF8HM9nEcoHtIGxhZgzsT0SA==",
+  "dgSpecHash": "WRvY1pI8E3xNzWkTIoPalhwoeJE4wpiukw6BTK2YgQGQWJDNg+WbTJk7Gcfn/buJ1ZKTbwJWCNShlR9ltrlJCw==",
   "success": true,
-  "projectFilePath": "/home/marian/repos/angular-dotnet-league-manager/backend/backend.csproj",
+  "projectFilePath": "/home/marian/Repos/complex-sportiv/angular-dotnet-league-manager/backend/backend.csproj",
   "expectedPackageFiles": [
     "/home/marian/.nuget/packages/dotnetenv/3.1.1/dotnetenv.3.1.1.nupkg.sha512",
     "/home/marian/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
@@ -158,7 +158,8 @@
     "/home/marian/.nuget/packages/system.threading.tasks.extensions/4.3.0/system.threading.tasks.extensions.4.3.0.nupkg.sha512",
     "/home/marian/.nuget/packages/system.threading.timer/4.3.0/system.threading.timer.4.3.0.nupkg.sha512",
     "/home/marian/.nuget/packages/system.xml.readerwriter/4.3.0/system.xml.readerwriter.4.3.0.nupkg.sha512",
-    "/home/marian/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512"
+    "/home/marian/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512",
+    "/home/marian/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.20/microsoft.aspnetcore.app.ref.8.0.20.nupkg.sha512"
   ],
   "logs": []
 }

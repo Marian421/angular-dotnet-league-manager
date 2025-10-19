@@ -9149,11 +9149,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/marian/repos/angular-dotnet-league-manager/backend/backend.csproj",
+      "projectUniqueName": "/home/marian/Repos/complex-sportiv/angular-dotnet-league-manager/backend/backend.csproj",
       "projectName": "backend",
-      "projectPath": "/home/marian/repos/angular-dotnet-league-manager/backend/backend.csproj",
+      "projectPath": "/home/marian/Repos/complex-sportiv/angular-dotnet-league-manager/backend/backend.csproj",
       "packagesPath": "/home/marian/.nuget/packages/",
-      "outputPath": "/home/marian/repos/angular-dotnet-league-manager/backend/obj/",
+      "outputPath": "/home/marian/Repos/complex-sportiv/angular-dotnet-league-manager/backend/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/marian/.nuget/NuGet/NuGet.Config"
@@ -9214,6 +9214,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -9222,7 +9228,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.119/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.120/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
