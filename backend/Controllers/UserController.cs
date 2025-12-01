@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.Data;
-using backend.Services;
 using Microsoft.EntityFrameworkCore;
-using backend.DTOs;
 using Microsoft.OpenApi.Validations;
+using backend.Services;
+using backend.DTOs;
 
 namespace backend.Controllers
 {
@@ -13,75 +13,54 @@ namespace backend.Controllers
 
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IPasswordService _passwordService;
+        private readonly IUserService _userService;
 
 
-        public UsersController(AppDbContext context, IPasswordService passwordService)
+        public UsersController(IUserService userService)
         {
-            _context = context;
-            _passwordService = passwordService;
+            _userService = userService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _userService.GetUsersAsync();
+            return Ok(users);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+            return user is null ? Ok(user) : NotFound();
 
-            return user;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<User>> CreateUser(RegisterUserDTO dto)
         {
-
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            try
             {
-                return Conflict(new { message = "There already exists an account with this email" });
+                var user = await _userService.RegisterUserAsync(dto);
+                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
-
-            var user = new User
+            catch (InvalidOperationException ex)
             {
-                Name = dto.Name,
-                Email = dto.Email,
-                Role = "User"
-            };
-
-            user.PasswordHash = _passwordService.HashPassword(user, dto.Password);
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginUserDTO dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            var user = await _userService.LoginUserAsync(dto);
             if (user == null)
             {
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            var ok = _passwordService.VerifyPassword(user, user.PasswordHash, dto.Password);
-            if (!ok)
-            {
-                return Unauthorized(new { message = "Invalid credentials" });
-            }
-
-            return Ok(new { message = "Login succesfull", userId = user.Id });
+            return Ok(new { message = "Login succesful", userId = user.Id });
         }
     }
 }

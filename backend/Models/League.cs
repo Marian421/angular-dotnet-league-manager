@@ -1,5 +1,8 @@
 namespace backend.Models
 {
+    /// <summary>
+    /// Represents the league
+    /// </summary>
     public class League
     {
         public int Id { get; set; }
