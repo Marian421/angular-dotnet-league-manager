@@ -36,6 +36,21 @@ public class UsersControllerTests : IClassFixture<CustomWebApplicationFactory>
         createdUser!.Email.Should().Be("john@example.com");
     }
 
+
+    [Theory]
+    [InlineData(null, "john@example.com", "password123")]
+    [InlineData("John", "not-an-email", "password123")]
+    [InlineData("John", "john@example.com", "short")]
+    public async Task Register_Should_Return_400_For_Invalid_Input(string name, string email, string password)
+    {
+        var dto = new RegisterUserDTO { Name = name, Email = email, Password = password };
+
+        var response = await _client.PostAsJsonAsync("/api/users/register", dto);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+
     [Fact]
     public async Task Login_Should_Return_Unauthorized_For_Invalid_Credentials()
     {

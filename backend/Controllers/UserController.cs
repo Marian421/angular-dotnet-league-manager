@@ -33,8 +33,12 @@ namespace backend.Controllers
         {
             var user = await _userService.GetUserByIdAsync(id);
 
-            return user is null ? Ok(user) : NotFound();
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            return user;
         }
 
         [HttpPost("register")]
