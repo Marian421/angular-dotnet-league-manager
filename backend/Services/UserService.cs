@@ -47,7 +47,6 @@ namespace backend.Services
             return user;
         }
 
-
         public async Task<User?> LoginUserAsync(LoginUserDTO dto)
         {
             var user = await _repo.GetByEmailAsync(dto.Email);
