@@ -4,23 +4,15 @@ using backend.Repositories;
 using FluentAssertions;
 using Moq;
 using Xunit;
+using System.Threading.Tasks;
+using System.Linq;
 using backend.DTOs;
+using backend.Tests.TestData.Fakes;
 
-namespace backend.Tests.Unit;
+namespace backend.Tests.Unit.Services;
 
-public class UserServiceTests
+public class RegisterUserAsync
 {
-    private readonly List<User> fakeUsers = new()
-    {
-        new User { Id = 1, Name = "Alice", Email = "alice@example.com" },
-        new User { Id = 2, Name = "Bob", Email = "bob@example.com" }
-    };
-
-
-
-
-
-
     [Fact]
     public async Task RegisterUserAsync_Should_Register_User_When_Email_Not_Exists()
     {
@@ -90,30 +82,8 @@ public class UserServiceTests
         mockRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
-    [Fact]
-    public void HashPassword_Should_Return_Different_Value_Than_Input()
-    {
-        // Arrange
-        var service = new PasswordService();
-        var user = new User { Email = "test@test.com" };
-
-        // Act
-        var result = service.HashPassword(user, "mypassword");
-
-        // Assert
-        result.Should().NotBe("mypassword");
-        result.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public void VerifyPassword_Should_Return_True_For_Valid_Password()
-    {
-        var service = new PasswordService();
-        var user = new User { Email = "test@test.com" };
-
-        var hash = service.HashPassword(user, "mypassword");
-
-        service.VerifyPassword(user, hash, "mypassword")
-               .Should().BeTrue();
-    }
 }
+
+
+
+
