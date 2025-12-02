@@ -3,8 +3,8 @@ using backend.Models;
 
 public interface IUserService
 {
-    Task<IEnumerable<User>> GetUsersAsync();
-    Task<User?> GetUserByIdAsync(int id);
-    Task<User> RegisterUserAsync(RegisterUserDTO dto);
-    Task<User?> LoginUserAsync(LoginUserDTO dto);
+    Task<IEnumerable<GetUserDto>> GetUsersAsync();
+    Task<GetUserDto?> GetUserByIdAsync(int id);
+    Task<int> RegisterUserAsync(RegisterUserDTO dto);
+    Task<int?> LoginUserAsync(LoginUserDTO dto);
 }
