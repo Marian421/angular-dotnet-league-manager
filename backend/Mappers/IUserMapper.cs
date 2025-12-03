@@ -5,7 +5,7 @@ using backend.Models;
 namespace backend.Mappers;
 
 public interface IUserMapper : 
-ICreateMapper<User, RegisterUserDTO>,
-IGetMapper<User, GetUserDto>
+IMapper<RegisterUserDTO, User>,
+IMapper<User, GetUserDto>
 {
 }
