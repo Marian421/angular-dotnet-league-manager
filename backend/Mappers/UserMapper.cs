@@ -5,22 +5,22 @@ namespace backend.Mappers;
 
 public class UserMapper : IUserMapper
 {
-    public User Map(RegisterUserDTO dto)
+    public User Map(RegisterUserDTO source)
     {
         return new()
         {
-            Name = dto.Name,
-            Email = dto.Email,
+            Name = source.Name,
+            Email = source.Email,
             Role = "user",
         };
     }
 
-    public GetUserDto Map(User model)
+    public GetUserDto Map(User source)
     {
         return new()
         {
-            Id = model.Id,
-            Name = model.Name,
+            Id = source.Id,
+            Name = source.Name,
         };
     }
 }
