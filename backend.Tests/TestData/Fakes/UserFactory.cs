@@ -1,6 +1,7 @@
 using backend.Models;
 using System.Collections.Generic;
 using System.Linq;
+using backend.DTOs;
 
 namespace backend.Tests.TestData.Fakes
 {
@@ -23,5 +24,15 @@ namespace backend.Tests.TestData.Fakes
         // Get a single user by id
         public static User? GetUserById(int id) =>
             _fakeUsers.FirstOrDefault(u => u.Id == id);
+
+        /// <summary>
+        /// Return the GetUserDtos for the list of fake users
+        /// </summary>
+        public static List<GetUserDto> GetFakeUsersDtos()
+        {
+            return _fakeUsers
+              .Select(u => new GetUserDto { Id = u.Id, Name = u.Name, Email = u.Email })
+              .ToList();
+        }
     }
 }
