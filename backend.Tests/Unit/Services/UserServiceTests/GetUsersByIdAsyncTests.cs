@@ -20,14 +20,16 @@ public class GetUsersByIdAsync
     public async Task GetUsersByIdAsync_Should_Return_Correct_Result(int testId)
     {
         // Arrange
+        var builder = new UserServiceBuilder();
+
         List<User> fakeUsers = UserFactory.GetFakeUsers();
-        var mockRepo = new Mock<IUserRepository>();
+
         var expectedUser = UserFactory.GetUserById(testId);
-        mockRepo
-            .Setup(r => r.GetByIdAsync(testId))
+
+        builder.Repo.Setup(r => r.GetByIdAsync(testId))
             .ReturnsAsync(expectedUser);
 
-        var service = new UserService(mockRepo.Object, null!);
+        var service = builder.Build();
 
         // Act
         var result = await service.GetUserByIdAsync(testId);

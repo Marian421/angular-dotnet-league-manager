@@ -39,8 +39,6 @@ public class RegisterUserAsync
         var result = await service.RegisterUserAsync(dto);
 
         // Assert
-        result.Should().BeOfType(, "");
-
         builder.Repo.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
         builder.Repo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
