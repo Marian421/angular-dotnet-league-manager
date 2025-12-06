@@ -8,8 +8,8 @@ namespace backend.Models
         public string PasswordHash { get; set; }
         public string Role { get; set; }
 
-        public Player PlayerProfile { get; set; }
-        public Team TeamCoached { get; set; } // if this user is a coach
-        
+        public Player? PlayerProfile { get; set; }
+        public Team? TeamCoached { get; set; } // if this user is a coach
+
     }
 }
