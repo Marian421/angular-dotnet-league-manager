@@ -61,7 +61,7 @@ public class UserServiceBuilder
     public UserServiceBuilder MapUsersToDtos()
     {
         Mapper.Setup(m => m.Map(It.IsAny<User>()))
-              .Returns((User u) => new GetUserDto { Id = u.Id, Name = u.Name });
+              .Returns((User u) => new GetUserDto { Id = u.Id, Name = u.Name, Email = u.Email });
         return this;
     }
 
