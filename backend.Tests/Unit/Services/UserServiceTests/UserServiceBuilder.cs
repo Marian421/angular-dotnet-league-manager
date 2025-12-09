@@ -37,6 +37,15 @@ public class UserServiceBuilder
         return this;
     }
 
+    public UserServiceBuilder WithNoExistingUser(string email)
+    {
+        Repo
+          .Setup(r => r.GetByEmailAsync(email))
+          .ReturnsAsync((User?)null);
+
+        return this;
+    }
+
     /// <summary>
     /// Configures the repository mock to return a specific user by email.
     /// </summary>

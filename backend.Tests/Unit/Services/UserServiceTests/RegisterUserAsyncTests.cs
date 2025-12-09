@@ -13,8 +13,9 @@ namespace backend.Tests.Unit.Services;
 
 public class RegisterUserAsync
 {
+
     [Fact]
-    public async Task RegisterUserAsync_Should_Register_User_When_Email_Not_Exists()
+    public async Task RegisterUserAsync_Should_Register_User_When_Email_Is_Available()
     {
         // Arrange
         var builder = new UserServiceBuilder();
@@ -23,25 +24,53 @@ public class RegisterUserAsync
         {
             Name = "Alice",
             Email = "alice@example.com",
-            Password = "mypassword"
+            Password = "Secret123"
         };
 
-        // Email does not exist
-        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email))
+        // mapper must return a new user INSTANCE
+        var mappedUser = new User
+        {
+            Name = dto.Name,
+            Email = dto.Email,
+            Role = "user"
+        };
+
+        builder.Repo
+          .Setup(r => r.GetByEmailAsync(dto.Email))
           .ReturnsAsync((User?)null);
 
-        // Password hashing
-        builder.Password.Setup(p => p.HashPassword(It.IsAny<User>(), dto.Password))
+        builder.Mapper
+          .Setup(m => m.Map(dto))
+          .Returns(mappedUser);
+
+        // Simulate hash function:
+        builder.Password
+          .Setup(p => p.HashPassword(mappedUser, dto.Password))
           .Returns("hashed_pw");
 
+        // Simulate EF assigning an ID when calling AddAsync
+        builder.Repo
+          .Setup(r => r.AddAsync(It.IsAny<User>()))
+          .Callback<User>(u => u.Id = 99)     // EF-like behavior
+          .Returns(Task.CompletedTask);
+
+        builder.Repo
+          .Setup(r => r.SaveChangesAsync())
+          .Returns(Task.CompletedTask);
+
         var service = builder.Build();
+
         // Act
         var result = await service.RegisterUserAsync(dto);
 
         // Assert
-        builder.Repo.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
+        result.Should().Be(99);                 // returned id
+        mappedUser.PasswordHash.Should().Be("hashed_pw");
+
+        builder.Repo.Verify(r => r.AddAsync(mappedUser), Times.Once);
         builder.Repo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
 
 
     [Fact]
