@@ -3,11 +3,9 @@ using backend.Services;
 using backend.Repositories;
 using FluentAssertions;
 using Moq;
-using Xunit;
-using System.Threading.Tasks;
-using System.Linq;
-using backend.DTOs;
 using backend.Tests.TestData.Fakes;
+using backend.Mappers;
+using backend.DTOs;
 
 namespace backend.Tests.Unit.Services;
 
@@ -17,12 +15,13 @@ public class GetUsersAsync
     public async Task GetUsersAsync_Should_Return_All_Users()
     {
         // Arrange
-        List<User> fakeUsers = UserFactory.GetFakeUsers();
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetAllAsync())
-                .ReturnsAsync(fakeUsers);
 
-        var service = new UserService(mockRepo.Object, null!);
+        var service = new UserServiceBuilder()
+          .WithFakeUsers()
+          .MapUsersToDtos()
+          .Build();
+
+        var fakeUsers = UserFactory.GetFakeUsersDtos();
 
         // Act
         var result = await service.GetUsersAsync();
@@ -34,15 +33,21 @@ public class GetUsersAsync
     [Fact]
     public async Task GetUsersAsync_Should_Return_Empty_List_When_No_Users()
     {
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetAllAsync())
-                .ReturnsAsync(new List<User>());
+        // Arrange
 
-        var service = new UserService(mockRepo.Object, null!);
+        var service = new UserServiceBuilder()
+          .SetupDefaultMocks()
+          .MapUsersToDtos()
+          .Build();
+
+        // Act
 
         var result = await service.GetUsersAsync();
 
-        result.Should().BeEmpty();
+        // Assert
+        result
+          .Should()
+          .BeEquivalentTo(Enumerable.Empty<GetUserDto>());
     }
 }
 

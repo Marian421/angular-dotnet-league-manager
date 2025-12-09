@@ -13,50 +13,71 @@ namespace backend.Tests.Unit.Services;
 
 public class RegisterUserAsync
 {
+
     [Fact]
-    public async Task RegisterUserAsync_Should_Register_User_When_Email_Not_Exists()
+    public async Task RegisterUserAsync_Should_Register_User_When_Email_Is_Available()
     {
         // Arrange
-        var mockRepo = new Mock<IUserRepository>();
-        var mockPassword = new Mock<IPasswordService>();
+        var builder = new UserServiceBuilder();
 
         var dto = new RegisterUserDTO
         {
             Name = "Alice",
             Email = "alice@example.com",
-            Password = "mypassword"
+            Password = "Secret123"
         };
 
-        // Email does not exist
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
+        // mapper must return a new user INSTANCE
+        var mappedUser = new User
+        {
+            Name = dto.Name,
+            Email = dto.Email,
+            Role = "user"
+        };
+
+        builder.Repo
+          .Setup(r => r.GetByEmailAsync(dto.Email))
           .ReturnsAsync((User?)null);
 
-        // Password hashing
-        mockPassword.Setup(p => p.HashPassword(It.IsAny<User>(), dto.Password))
+        builder.Mapper
+          .Setup(m => m.Map(dto))
+          .Returns(mappedUser);
+
+        // Simulate hash function:
+        builder.Password
+          .Setup(p => p.HashPassword(mappedUser, dto.Password))
           .Returns("hashed_pw");
 
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        // Simulate EF assigning an ID when calling AddAsync
+        builder.Repo
+          .Setup(r => r.AddAsync(It.IsAny<User>()))
+          .Callback<User>(u => u.Id = 99)     // EF-like behavior
+          .Returns(Task.CompletedTask);
+
+        builder.Repo
+          .Setup(r => r.SaveChangesAsync())
+          .Returns(Task.CompletedTask);
+
+        var service = builder.Build();
 
         // Act
         var result = await service.RegisterUserAsync(dto);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be(dto.Name);
-        result.Email.Should().Be(dto.Email);
-        result.PasswordHash.Should().Be("hashed_pw");
+        result.Should().Be(99);                 // returned id
+        mappedUser.PasswordHash.Should().Be("hashed_pw");
 
-        mockRepo.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
-        mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+        builder.Repo.Verify(r => r.AddAsync(mappedUser), Times.Once);
+        builder.Repo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
 
 
     [Fact]
     public async Task RegisterUserAsync_Should_Throw_When_Email_Already_Exists()
     {
         // Arrange
-        var mockRepo = new Mock<IUserRepository>();
-        var mockPassword = new Mock<IPasswordService>();
+        var builder = new UserServiceBuilder();
 
         var dto = new RegisterUserDTO
         {
@@ -65,11 +86,10 @@ public class RegisterUserAsync
             Password = "mypassword"
         };
 
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
+        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email))
           .ReturnsAsync(new User { Email = dto.Email });
 
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
-
+        var service = builder.Build();
         // Act
         var act = () => service.RegisterUserAsync(dto);
 
@@ -78,8 +98,8 @@ public class RegisterUserAsync
           .WithMessage("There already exists an account with this email");
 
         // Ensure repo is NOT called for creation
-        mockRepo.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
-        mockRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+        builder.Repo.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
+        builder.Repo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
 }

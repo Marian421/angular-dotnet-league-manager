@@ -7,6 +7,7 @@ using Xunit;
 using System.Threading.Tasks;
 using System.Linq;
 using backend.DTOs;
+using backend.Mappers;
 
 namespace backend.Tests.Unit.Services;
 
@@ -22,43 +23,35 @@ public class UserServiceLoginTests
     public async Task LoginUserAsync_Should_Return_User_When_Credentials_Are_Correct()
     {
         // Arrange
+        var builder = new UserServiceBuilder();
         var dto = new LoginUserDTO { Email = "alice@example.com", Password = "password" };
         var user = fakeUsers.First(u => u.Email == dto.Email);
 
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
-                .ReturnsAsync(user);
+        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync(user);
+        builder.Password.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password)).Returns(true);
 
-        var mockPassword = new Mock<IPasswordService>();
-        mockPassword.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password))
-                    .Returns(true);
-
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        var service = builder.Build();
 
         // Act
         var result = await service.LoginUserAsync(dto);
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(user);
 
-        mockRepo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
-        mockPassword.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
+        builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
+        builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
     }
 
     [Fact]
     public async Task LoginUserAsync_Should_Return_Null_When_User_Not_Found()
     {
         // Arrange
+        var builder = new UserServiceBuilder();
         var dto = new LoginUserDTO { Email = "unknown@example.com", Password = "whatever" };
 
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
-                .ReturnsAsync((User?)null);
+        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync((User?)null);
 
-        var mockPassword = new Mock<IPasswordService>();
-
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        var service = builder.Build();
 
         // Act
         var result = await service.LoginUserAsync(dto);
@@ -66,27 +59,22 @@ public class UserServiceLoginTests
         // Assert
         result.Should().BeNull();
 
-        mockRepo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
-        // VerifyPassword should never be called because user is null
-        mockPassword.Verify(p => p.VerifyPassword(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
+        builder.Password.Verify(p => p.VerifyPassword(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public async Task LoginUserAsync_Should_Return_Null_When_Password_Is_Incorrect()
     {
         // Arrange
+        var builder = new UserServiceBuilder();
         var dto = new LoginUserDTO { Email = "bob@example.com", Password = "wrong" };
         var user = fakeUsers.First(u => u.Email == dto.Email);
 
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
-                .ReturnsAsync(user);
+        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync(user);
+        builder.Password.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password)).Returns(false);
 
-        var mockPassword = new Mock<IPasswordService>();
-        mockPassword.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password))
-                    .Returns(false);
-
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        var service = builder.Build();
 
         // Act
         var result = await service.LoginUserAsync(dto);
@@ -94,66 +82,61 @@ public class UserServiceLoginTests
         // Assert
         result.Should().BeNull();
 
-        mockRepo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
-        mockPassword.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
+        builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
+        builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
     }
 
     [Fact]
     public async Task LoginUserAsync_Should_Propagate_Exception_From_PasswordService()
     {
         // Arrange
+        var builder = new UserServiceBuilder();
         var dto = new LoginUserDTO { Email = "alice@example.com", Password = "password" };
         var user = fakeUsers.First(u => u.Email == dto.Email);
 
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByEmailAsync(dto.Email))
-                .ReturnsAsync(user);
+        builder.Repo.Setup(r => r.GetByEmailAsync(dto.Email)).ReturnsAsync(user);
+        builder.Password.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password))
+                       .Throws(new InvalidOperationException("password service failed"));
 
-        var mockPassword = new Mock<IPasswordService>();
-        mockPassword.Setup(p => p.VerifyPassword(user, user.PasswordHash, dto.Password))
-                    .Throws(new System.InvalidOperationException("password service failed"));
-
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        var service = builder.Build();
 
         // Act
         var act = () => service.LoginUserAsync(dto);
 
         // Assert: exception bubbles up
-        await act.Should().ThrowAsync<System.InvalidOperationException>()
+        await act.Should().ThrowAsync<InvalidOperationException>()
                  .WithMessage("password service failed");
 
-        mockRepo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
-        mockPassword.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
+        builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
+        builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
     }
 
-    // Optional: parameterized test for a couple of variations (happy + wrong password)
     [Theory]
     [InlineData("alice@example.com", "password", true)]
     [InlineData("alice@example.com", "wrong", false)]
     public async Task LoginUserAsync_Theory_Calls_VerifyPassword_And_Returns_Appropriate_Result(string email, string password, bool expectedSuccess)
     {
         // Arrange
+        var builder = new UserServiceBuilder();
         var dto = new LoginUserDTO { Email = email, Password = password };
         var user = fakeUsers.First(u => u.Email == email);
 
-        var mockRepo = new Mock<IUserRepository>();
-        mockRepo.Setup(r => r.GetByEmailAsync(email)).ReturnsAsync(user);
+        builder.Repo.Setup(r => r.GetByEmailAsync(email)).ReturnsAsync(user);
+        builder.Password.Setup(p => p.VerifyPassword(user, user.PasswordHash, password)).Returns(expectedSuccess);
 
-        var mockPassword = new Mock<IPasswordService>();
-        mockPassword.Setup(p => p.VerifyPassword(user, user.PasswordHash, password)).Returns(expectedSuccess);
-
-        var service = new UserService(mockRepo.Object, mockPassword.Object);
+        var service = builder.Build();
 
         // Act
         var result = await service.LoginUserAsync(dto);
 
         // Assert
         if (expectedSuccess)
-            result.Should().NotBeNull().And.BeEquivalentTo(user);
+            result.Should().NotBeNull();
         else
             result.Should().BeNull();
 
-        mockRepo.Verify(r => r.GetByEmailAsync(email), Times.Once);
-        mockPassword.Verify(p => p.VerifyPassword(user, user.PasswordHash, password), Times.Once);
+        builder.Repo.Verify(r => r.GetByEmailAsync(email), Times.Once);
+        builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, password), Times.Once);
     }
 }
+

@@ -20,26 +20,29 @@ public class GetUsersByIdAsync
     public async Task GetUsersByIdAsync_Should_Return_Correct_Result(int testId)
     {
         // Arrange
-        List<User> fakeUsers = UserFactory.GetFakeUsers();
-        var mockRepo = new Mock<IUserRepository>();
-        var expectedUser = UserFactory.GetUserById(testId);
-        mockRepo
-            .Setup(r => r.GetByIdAsync(testId))
-            .ReturnsAsync(expectedUser);
-
-        var service = new UserService(mockRepo.Object, null!);
+        var service = new UserServiceBuilder()
+          .WithFakeUserById(testId)
+          .MapUsersToDtos()
+          .Build();
 
         // Act
         var result = await service.GetUserByIdAsync(testId);
+        var expectedUser = UserFactory.GetUserById(testId);
 
         // Assert
-        if (expectedUser is null)
+        if (expectedUser == null)
         {
             result.Should().BeNull();
         }
         else
         {
-            result.Should().BeEquivalentTo(expectedUser);
+            var expectedDto = new GetUserDto
+            {
+                Id = expectedUser.Id,
+                Name = expectedUser.Name,
+                Email = expectedUser.Email
+            };
+            result.Should().BeEquivalentTo(expectedDto);
         }
     }
 }

@@ -22,23 +22,17 @@ namespace backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<GetUserDto>>> GetUsers()
         {
-            var users = await _userService.GetUsersAsync();
-            return Ok(users);
+            var dtos = await _userService.GetUsersAsync();
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<GetUserDto>> GetUser(int id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
+            var dto = await _userService.GetUserByIdAsync(id);
+            return dto != null ? Ok(dto) : NotFound();
         }
 
         [HttpPost("register")]
@@ -46,8 +40,10 @@ namespace backend.Controllers
         {
             try
             {
-                var user = await _userService.RegisterUserAsync(dto);
-                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+                // e mai ok sa returnezi doar id user ca sa poti schimba dto-ul mai tarziu
+                var id = await _userService.RegisterUserAsync(dto);
+                var getDto = await _userService.GetUserByIdAsync(id);
+                return CreatedAtAction(nameof(GetUser), new { id = id }, getDto);
             }
             catch (InvalidOperationException ex)
             {
@@ -58,13 +54,13 @@ namespace backend.Controllers
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginUserDTO dto)
         {
-            var user = await _userService.LoginUserAsync(dto);
-            if (user == null)
+            var id = await _userService.LoginUserAsync(dto);
+            if (id == null)
             {
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            return Ok(new { message = "Login succesful", userId = user.Id });
+            return Ok(new { message = "Login succesful", userId = (int)id });
         }
     }
 }
