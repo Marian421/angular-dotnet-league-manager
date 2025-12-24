@@ -1,11 +1,10 @@
 import { CommonModule } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-
+import { ActivatedRoute, RouterLink } from "@angular/router";
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: 'login.component.html',
 })
 export class LoginComponent {
