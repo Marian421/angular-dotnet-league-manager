@@ -9,7 +9,12 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', component: LandingComponent }
+      { path: '', component: LandingComponent },
+      {
+        path: 'teams',
+        loadChildren: () =>
+          import("./features/teams/teams.routes").then(m => m.teamsRoutes)
+      }
     ],
   },
   {
