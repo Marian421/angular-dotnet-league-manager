@@ -5,14 +5,23 @@ namespace backend.Models
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public int LeagueId { get; set; }
-        public League League {get; set; }
+        // Owner / Manager
+        public int OwnerId { get; set; }
+        public User Owner { get; set; }
 
-        public int CoachId { get; set; }
-        public User Coach { get; set; }
+        // Members
+        public List<TeamMember> Members { get; set; }
 
-        public List<Player> Players { get; set; }
-        public List<Match> HomeMatches { get; set; }
-        public List<Match> AwayMatches { get; set; }
+        // Matches (home + away inferred)
+        public List<Match> Matches { get; set; }
+
+        // Championships
+        public List<ChampionshipTeam> Championships { get; set; }
+
+        // Metadata for Find Team
+        public bool IsCompetitive { get; set; }
+        public int? MinAge { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
+
