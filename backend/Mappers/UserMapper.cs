@@ -11,7 +11,6 @@ public class UserMapper : IUserMapper
         {
             Name = source.Name,
             Email = source.Email,
-            Role = "user",
         };
     }
 
