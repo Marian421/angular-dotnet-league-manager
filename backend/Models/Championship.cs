@@ -14,6 +14,7 @@ namespace backend.Models
 
         // Participants
         public List<ChampionshipTeam> Teams { get; set; }
+        public List<ChampionshipApplication> ChampionshipApplications { get; set; }
         public List<Match> Matches { get; set; }
     }
 }
