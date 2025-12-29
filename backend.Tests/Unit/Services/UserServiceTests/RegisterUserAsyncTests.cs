@@ -32,7 +32,6 @@ public class RegisterUserAsync
         {
             Name = dto.Name,
             Email = dto.Email,
-            Role = "user"
         };
 
         builder.Repo
