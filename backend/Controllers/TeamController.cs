@@ -9,40 +9,37 @@ namespace backend.Controllers
 
     public class TeamsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ITeamService _teamService;
 
-        public TeamsController(AppDbContext context)
+        public TeamsController(ITeamService teamService)
         {
-            _context = context;
+            _teamService = teamService;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Team>> GetTeams()
+        public async Task<ActionResult<IEnumerable<Team>>> GetTeams()
         {
-            return _context.Teams.ToList();
+            var teams = await _teamService.GetTeamsAsync();
+
+            if (!teams.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(teams);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Team> GetTeam(int id)
+        public async Task<ActionResult<Team>> GetTeam(int id)
         {
-            var team = _context.Teams.Find(id);
+            var team = await _teamService.GetTeamByIdAsync(id);
 
             if (team == null)
             {
                 return NotFound();
             }
 
-            return team;
+            return Ok(team);
         }
-
-        [HttpPost]
-        public ActionResult<Team> CreateTeam(Team team)
-        {
-            _context.Teams.Add(team);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetTeam), new { id = team.Id }, team);
-        }
-
     }
 }
