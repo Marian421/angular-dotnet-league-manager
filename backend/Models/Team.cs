@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace backend.Models
 {
     public class Team
@@ -10,10 +12,17 @@ namespace backend.Models
         public User Owner { get; set; }
 
         // Members
-        public List<TeamMember> Members { get; set; }
+        public List<TeamMember> Members { get; set; } = new();
 
-        // Matches (home + away inferred)
-        public List<Match> Matches { get; set; }
+        // Matches
+        public List<Match> MatchesAsTeamA { get; set; } = new();
+        public List<Match> MatchesAsTeamB { get; set; } = new();
+
+        [NotMapped]
+        public IEnumerable<Match> Matches
+        {
+            get { return MatchesAsTeamA.Concat(MatchesAsTeamB); }
+        }
 
         // Championships
         public List<ChampionshipTeam> Championships { get; set; }
