@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.Data;
+using backend.DTOs.Teams;
 
 namespace backend.Controllers
 {
@@ -40,6 +41,20 @@ namespace backend.Controllers
             }
 
             return Ok(team);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostTeam([FromBody] TeamCreateDto dto)
+        {
+            try
+            {
+                var createdTeam = await _teamService.CreateTeamAsync(dto);
+                return CreatedAtAction(nameof(GetTeam), new { id = createdTeam.Id }, createdTeam);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
