@@ -12,9 +12,8 @@ export const routes: Routes = [
       { path: '', component: LandingComponent },
       {
         path: 'teams',
-        loadChildren: () =>
-          import("./features/teams/teams.routes").then(m => m.teamsRoutes)
-      }
+        loadChildren: () => import('./features/teams/teams.routes').then((m) => m.teamsRoutes),
+      },
     ],
   },
   {
@@ -24,5 +23,5 @@ export const routes: Routes = [
   {
     path: 'register',
     component: RegisterComponent,
-  }
+  },
 ];
