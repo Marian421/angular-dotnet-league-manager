@@ -6,7 +6,7 @@ using backend.DTOs.Teams;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/teams")]
 
     public class TeamsController : ControllerBase
     {
