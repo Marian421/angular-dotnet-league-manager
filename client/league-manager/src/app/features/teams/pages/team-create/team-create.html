@@ -1,1 +1,86 @@
-<p>team-create works!</p>
+<section class="bg-slate-100">
+  <div class="max-w-3xl mx-auto px-6 py-20">
+    <div class="rounded-2xl bg-white shadow-xl p-8 md:p-12">
+      <h2 class="text-3xl font-bold text-slate-900 text-center">Create a Team</h2>
+
+      <p class="mt-2 text-center text-slate-600">Set up your team details to get started</p>
+
+      <form [formGroup]="teamForm" (ngSubmit)="onSubmit()" class="mt-10 space-y-6">
+        <!-- Team Name -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700"> Team Name </label>
+          <input
+            type="text"
+            formControlName="name"
+            class="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition"
+            placeholder="Enter team name"
+          />
+
+          <p
+            *ngIf="teamForm.get('name')?.invalid && teamForm.get('name')?.touched"
+            class="mt-1 text-sm text-red-500"
+          >
+            Name is required
+          </p>
+        </div>
+
+
+        <!-- Minimum Age -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700"> Minimum Age </label>
+
+          <input
+            type="number"
+            formControlName="minAge"
+            min="0"
+            class="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition"
+          />
+
+          <!-- Helper text -->
+          <p class="mt-1 text-sm text-slate-500">
+            The minimum age required for players applying to this team.
+          </p>
+
+          <!-- Validation error -->
+          <p
+            *ngIf="teamForm.get('minAge')?.invalid && teamForm.get('minAge')?.touched"
+            class="mt-1 text-sm text-red-500"
+          >
+            Minimum age must be 0 or higher
+          </p>
+        </div>
+
+
+        <!-- Is competitive -->
+        <div class="pt-2">
+          <label class="flex items-start gap-3">
+            <input
+              type="checkbox"
+              formControlName="isCompetitive"
+              class="mt-1 h-5 w-5 rounded border-slate-300 text-orange-500 focus:ring-orange-400"
+            />
+
+            <div>
+              <span class="block text-sm font-semibold text-slate-700"> Competitive team </span>
+              <span class="block text-sm text-slate-500">
+                Enable this if the team competes in leagues or tournaments.
+              </span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-4">
+          <button
+            type="submit"
+            [disabled]="teamForm.invalid"
+            class="w-full rounded-lg bg-orange-500 px-6 py-3 text-white font-semibold hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Create Team
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
