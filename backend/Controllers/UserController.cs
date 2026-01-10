@@ -9,7 +9,7 @@ using backend.DTOs;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // api/users
+    [Route("api/users")] // api/users
 
     public class UsersController : ControllerBase
     {

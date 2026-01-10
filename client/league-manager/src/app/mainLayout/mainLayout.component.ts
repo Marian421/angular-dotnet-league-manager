@@ -7,4 +7,4 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   imports: [RouterOutlet, RouterLink],
   templateUrl: './mainLayout.component.html',
 })
-export class MainLayoutComponent { }
+export class MainLayoutComponent {}

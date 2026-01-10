@@ -1,6 +1,6 @@
-import { CommonModule } from "@angular/common";
-import { Component, inject, signal } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone: true,

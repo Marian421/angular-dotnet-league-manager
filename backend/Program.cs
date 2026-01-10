@@ -12,6 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+        policy
+            .WithOrigins("http://localhost:4200") // Angular dev server
+            .AllowAnyHeader()
+            .AllowAnyMethod() // GET, POST, OPTIONS, etc.
+    );
+});
+
 var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 // Console.WriteLine($"Variable is: {connectionString}");
 
@@ -44,6 +54,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAngularDev");
 
 app.UseHttpsRedirection();
 
