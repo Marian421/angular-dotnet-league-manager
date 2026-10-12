@@ -2,6 +2,7 @@ using backend;
 using backend.Data;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Tests.Integration;
@@ -16,6 +17,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var descriptor = services.SingleOrDefault(d =>
                 d.ServiceType == typeof(DbContextOptions<AppDbContext>));
             if (descriptor != null) services.Remove(descriptor);
+
+            // Since EF Core 9 the UseNpgsql call is kept as a separate options configuration
+            var optionsConfigurations = services.Where(d =>
+                d.ServiceType == typeof(IDbContextOptionsConfiguration<AppDbContext>)).ToList();
+            foreach (var configuration in optionsConfigurations) services.Remove(configuration);
 
             // Use a unique DB per test class instance
             var dbName = $"TestDb_{Guid.NewGuid()}";
