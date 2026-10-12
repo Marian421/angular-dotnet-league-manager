@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.Data;
 using backend.DTOs.Teams;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
@@ -43,6 +44,7 @@ namespace backend.Controllers
             return Ok(team);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTeam([FromBody] TeamCreateDto dto)
         {

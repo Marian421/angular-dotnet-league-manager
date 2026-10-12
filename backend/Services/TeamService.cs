@@ -9,11 +9,13 @@ namespace backend.Services
     {
         private readonly ITeamRepository _repo;
         private readonly IUserRepository _userRepo;
+        private readonly ICurrentUser _currentUser;
 
-        public TeamService(ITeamRepository repo, IUserRepository userRepo)
+        public TeamService(ITeamRepository repo, IUserRepository userRepo, ICurrentUser currentUser)
         {
             _repo = repo;
             _userRepo = userRepo;
+            _currentUser = currentUser;
         }
 
         public async Task<IEnumerable<TeamSummaryDto>> GetTeamsAsync()
@@ -37,11 +39,14 @@ namespace backend.Services
 
         public async Task<TeamDetailsDto> CreateTeamAsync(TeamCreateDto dto)
         {
+            // The owner is the caller, taken from the token
+            var ownerId = _currentUser.Id;
+
             // Check if Owner exists
-            var ownerExists = await _userRepo.GetByIdAsync(dto.OwnerId);
+            var ownerExists = await _userRepo.GetByIdAsync(ownerId);
             if (ownerExists is null)
             {
-                throw new KeyNotFoundException($"User with id {dto.OwnerId} not found");
+                throw new KeyNotFoundException($"User with id {ownerId} not found");
             }
 
             // Create the team entity
@@ -50,7 +55,7 @@ namespace backend.Services
                 Name = dto.Name,
                 MinAge = dto.MinAge,
                 IsCompetitive = dto.IsCompetitive,
-                OwnerId = dto.OwnerId,
+                OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow,
                 Members = new List<TeamMember>()
             };
