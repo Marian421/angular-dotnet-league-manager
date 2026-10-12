@@ -11,6 +11,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
     {
+        // Tests don't have a .env, so they bring their own signing key
+        builder.UseSetting("Jwt:Key", "integration-tests-signing-key-0123456789");
+
         builder.ConfigureServices(services =>
         {
             // Remove existing DbContext registration

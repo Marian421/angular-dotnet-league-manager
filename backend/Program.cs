@@ -7,10 +7,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using backend.Repositories;
 using backend.Mappers;
+using Microsoft.Extensions.Options;
+
+// Load .env before the builder so its values are part of builder.Configuration
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
-
-Env.Load();
 
 builder.Services.AddCors(options =>
 {
@@ -44,6 +46,37 @@ builder.Services.AddSingleton<IUserMapper, UserMapper>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 
+// Authentication
+builder.Services.AddOptions<JwtSettings>()
+    .Bind(builder.Configuration.GetSection("Jwt"))
+    .Validate(
+        jwt => Encoding.UTF8.GetByteCount(jwt.Key) >= 32,
+        "Jwt:Key must be set and at least 32 bytes long (set Jwt__Key in .env)")
+    .ValidateOnStart();
+
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<ITokenService, TokenService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IOptions<JwtSettings>>((options, jwt) =>
+    {
+        // Keep claim names as issued ("sub", "email") instead of the long legacy names
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt.Value.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwt.Value.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Value.Key)),
+            ValidateLifetime = true,
+            // Default is 5 minutes, which would stretch a 15 minute token to 20
+            ClockSkew = TimeSpan.FromSeconds(30),
+        };
+    });
+
 
 
 var app = builder.Build();
@@ -59,6 +92,7 @@ app.UseCors("AllowAngularDev");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
