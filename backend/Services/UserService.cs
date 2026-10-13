@@ -14,6 +14,7 @@ namespace backend.Services
         private readonly IPasswordService _passwordService;
         private readonly IUserMapper _userMapper;
         private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenRepository _refreshTokens;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -21,13 +22,15 @@ namespace backend.Services
         /// <param name="repo">Repository used to perform CRUD operations for users.</param>
         /// <param name="passwordService">Service used for hashing and verifying passwords.</param>
         /// <param name="userMapper">Mapper used for converting between models and DTOs.</param>
-        /// <param name="tokenService">Service used for issuing access tokens.</param>
-        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper, ITokenService tokenService)
+        /// <param name="tokenService">Service used for issuing access and refresh tokens.</param>
+        /// <param name="refreshTokens">Repository used to store issued refresh tokens.</param>
+        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper, ITokenService tokenService, IRefreshTokenRepository refreshTokens)
         {
             _repo = repo;
             _passwordService = passwordService;
             _userMapper = userMapper;
             _tokenService = tokenService;
+            _refreshTokens = refreshTokens;
         }
 
         /// <summary>
@@ -84,9 +87,9 @@ namespace backend.Services
         /// </summary>
         /// <param name="dto">The login credentials.</param>
         /// <returns>
-        /// A signed access token if authentication succeeds; otherwise <c>null</c>.
+        /// An access token and a refresh token if authentication succeeds; otherwise <c>null</c>.
         /// </returns>
-        public async Task<string?> LoginUserAsync(LoginUserDTO dto)
+        public async Task<LoginResponseDto?> LoginUserAsync(LoginUserDTO dto)
         {
             var user = await _repo.GetByEmailAsync(dto.Email);
             if (user == null)
@@ -95,7 +98,21 @@ namespace backend.Services
             }
 
             var ok = _passwordService.VerifyPassword(user, user.PasswordHash, dto.Password);
-            return ok ? _tokenService.CreateAccessToken(user) : null;
+            if (!ok)
+            {
+                return null;
+            }
+
+            // Every login starts a new token family
+            var refreshToken = _tokenService.CreateRefreshToken(user.Id, Guid.NewGuid());
+            await _refreshTokens.AddAsync(refreshToken.Entity);
+            await _refreshTokens.SaveChangesAsync();
+
+            return new LoginResponseDto
+            {
+                AccessToken = _tokenService.CreateAccessToken(user),
+                RefreshToken = refreshToken.Token,
+            };
         }
     }
 }

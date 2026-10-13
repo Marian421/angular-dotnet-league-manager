@@ -20,7 +20,7 @@ public class UserServiceLoginTests
     };
 
     [Fact]
-    public async Task LoginUserAsync_Should_Return_Token_When_Credentials_Are_Correct()
+    public async Task LoginUserAsync_Should_Return_Tokens_When_Credentials_Are_Correct()
     {
         // Arrange
         var builder = new UserServiceBuilder();
@@ -36,11 +36,14 @@ public class UserServiceLoginTests
         var result = await service.LoginUserAsync(dto);
 
         // Assert
-        result.Should().Be(UserServiceBuilder.FakeToken);
+        result!.AccessToken.Should().Be(UserServiceBuilder.FakeToken);
+        result.RefreshToken.Should().Be(UserServiceBuilder.FakeRefreshToken);
 
         builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
         builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
         builder.Token.Verify(t => t.CreateAccessToken(user), Times.Once);
+        builder.RefreshTokens.Verify(r => r.AddAsync(It.Is<RefreshToken>(t => t.UserId == user.Id)), Times.Once);
+        builder.RefreshTokens.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -86,6 +89,7 @@ public class UserServiceLoginTests
         builder.Repo.Verify(r => r.GetByEmailAsync(dto.Email), Times.Once);
         builder.Password.Verify(p => p.VerifyPassword(user, user.PasswordHash, dto.Password), Times.Once);
         builder.Token.Verify(t => t.CreateAccessToken(It.IsAny<User>()), Times.Never);
+        builder.RefreshTokens.Verify(r => r.AddAsync(It.IsAny<RefreshToken>()), Times.Never);
     }
 
     [Fact]

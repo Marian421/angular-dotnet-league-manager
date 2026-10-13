@@ -54,13 +54,13 @@ namespace backend.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponseDto>> Login(LoginUserDTO dto)
         {
-            var token = await _userService.LoginUserAsync(dto);
-            if (token == null)
+            var tokens = await _userService.LoginUserAsync(dto);
+            if (tokens == null)
             {
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            return Ok(new LoginResponseDto { AccessToken = token });
+            return Ok(tokens);
         }
     }
 }

@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace backend.Tests.Integration.Users;
@@ -46,6 +48,42 @@ public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
 
         // Assert
         login!.AccessToken.Should().NotBeNullOrEmpty();
+        login.RefreshToken.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task Login_Should_Store_The_Refresh_Token_As_A_Hash()
+    {
+        // Arrange
+        await _factory.ResetDatabaseAsync();
+        var dto = new RegisterUserDTO
+        {
+            Name = "Alice",
+            Email = "alice@example.com",
+            Password = "Password123"
+        };
+        var createUser = await _client.PostAsJsonAsync("api/users/register", dto);
+        createUser.EnsureSuccessStatusCode();
+        var user = await createUser.Content.ReadFromJsonAsync<GetUserDto>();
+        var loginDto = new LoginUserDTO
+        {
+            Email = "alice@example.com",
+            Password = "Password123"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync($"api/users/login", loginDto);
+        response.EnsureSuccessStatusCode();
+        var login = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+
+        // Assert
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var stored = db.RefreshTokens.Single();
+
+        stored.UserId.Should().Be(user!.Id);
+        stored.IsActive.Should().BeTrue();
+        stored.TokenHash.Should().NotBe(login!.RefreshToken);
     }
 
     [Fact]

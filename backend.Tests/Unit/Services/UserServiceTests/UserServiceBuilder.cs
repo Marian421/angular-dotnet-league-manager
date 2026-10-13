@@ -19,12 +19,18 @@ public class UserServiceBuilder
     public Mock<IPasswordService> Password { get; } = new();
     public Mock<IUserMapper> Mapper { get; } = new();
     public Mock<ITokenService> Token { get; } = new();
+    public Mock<IRefreshTokenRepository> RefreshTokens { get; } = new();
 
     public const string FakeToken = "fake-access-token";
+    public const string FakeRefreshToken = "fake-refresh-token";
 
     public UserServiceBuilder()
     {
         Token.Setup(t => t.CreateAccessToken(It.IsAny<User>())).Returns(FakeToken);
+        Token.Setup(t => t.CreateRefreshToken(It.IsAny<int>(), It.IsAny<Guid>()))
+             .Returns((int userId, Guid familyId) => new IssuedRefreshToken(
+                 FakeRefreshToken,
+                 new RefreshToken { UserId = userId, FamilyId = familyId, TokenHash = "fake-hash", IsActive = true }));
     }
 
     /// <summary>
@@ -127,7 +133,7 @@ public class UserServiceBuilder
     /// </summary>
     public UserService Build()
     {
-        return new UserService(Repo.Object, Password.Object, Mapper.Object, Token.Object);
+        return new UserService(Repo.Object, Password.Object, Mapper.Object, Token.Object, RefreshTokens.Object);
     }
 }
 
