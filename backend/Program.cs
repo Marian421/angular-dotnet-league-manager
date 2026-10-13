@@ -38,6 +38,7 @@ builder.Services.AddSwaggerGen();
 
 // User services 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddSingleton<IUserMapper, UserMapper>();

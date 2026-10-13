@@ -6,15 +6,13 @@ using backend.Mappers;
 namespace backend.Services
 {
     /// <summary>
-    /// Provides user-related operations such as registration, login, and retrieval.
+    /// Provides user-related operations such as registration and retrieval.
     /// </summary>
     public class UserService : IUserService
     {
         private readonly IUserRepository _repo;
         private readonly IPasswordService _passwordService;
         private readonly IUserMapper _userMapper;
-        private readonly ITokenService _tokenService;
-        private readonly IRefreshTokenRepository _refreshTokens;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -22,15 +20,11 @@ namespace backend.Services
         /// <param name="repo">Repository used to perform CRUD operations for users.</param>
         /// <param name="passwordService">Service used for hashing and verifying passwords.</param>
         /// <param name="userMapper">Mapper used for converting between models and DTOs.</param>
-        /// <param name="tokenService">Service used for issuing access and refresh tokens.</param>
-        /// <param name="refreshTokens">Repository used to store issued refresh tokens.</param>
-        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper, ITokenService tokenService, IRefreshTokenRepository refreshTokens)
+        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper)
         {
             _repo = repo;
             _passwordService = passwordService;
             _userMapper = userMapper;
-            _tokenService = tokenService;
-            _refreshTokens = refreshTokens;
         }
 
         /// <summary>
@@ -80,39 +74,6 @@ namespace backend.Services
             await _repo.SaveChangesAsync();
 
             return user.Id;
-        }
-
-        /// <summary>
-        /// Attempts to authenticate a user using email and password.
-        /// </summary>
-        /// <param name="dto">The login credentials.</param>
-        /// <returns>
-        /// An access token and a refresh token if authentication succeeds; otherwise <c>null</c>.
-        /// </returns>
-        public async Task<LoginResponseDto?> LoginUserAsync(LoginUserDTO dto)
-        {
-            var user = await _repo.GetByEmailAsync(dto.Email);
-            if (user == null)
-            {
-                return null;
-            }
-
-            var ok = _passwordService.VerifyPassword(user, user.PasswordHash, dto.Password);
-            if (!ok)
-            {
-                return null;
-            }
-
-            // Every login starts a new token family
-            var refreshToken = _tokenService.CreateRefreshToken(user.Id, Guid.NewGuid());
-            await _refreshTokens.AddAsync(refreshToken.Entity);
-            await _refreshTokens.SaveChangesAsync();
-
-            return new LoginResponseDto
-            {
-                AccessToken = _tokenService.CreateAccessToken(user),
-                RefreshToken = refreshToken.Token,
-            };
         }
     }
 }
