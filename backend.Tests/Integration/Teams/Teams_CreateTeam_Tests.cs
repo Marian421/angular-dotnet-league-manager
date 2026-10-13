@@ -36,7 +36,7 @@ public class Teams_CreateTeam_Tests : IClassFixture<CustomWebApplicationFactory>
         register.EnsureSuccessStatusCode();
         var user = await register.Content.ReadFromJsonAsync<GetUserDto>();
 
-        var login = await _client.PostAsJsonAsync("api/users/login", new LoginUserDTO
+        var login = await _client.PostAsJsonAsync("api/auth/login", new LoginUserDTO
         {
             Email = email,
             Password = "Password123"

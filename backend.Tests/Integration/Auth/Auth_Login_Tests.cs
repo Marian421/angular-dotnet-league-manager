@@ -7,14 +7,14 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace backend.Tests.Integration.Users;
+namespace backend.Tests.Integration.Auth;
 
-public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
+public class Auth_Login_Tests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
-    public Users_Login_Tests(CustomWebApplicationFactory factory)
+    public Auth_Login_Tests(CustomWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.CreateClient();
@@ -42,7 +42,7 @@ public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"api/users/login", loginDto);
+        var response = await _client.PostAsJsonAsync($"api/auth/login", loginDto);
         response.EnsureSuccessStatusCode();
         var login = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
 
@@ -72,7 +72,7 @@ public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"api/users/login", loginDto);
+        var response = await _client.PostAsJsonAsync($"api/auth/login", loginDto);
         response.EnsureSuccessStatusCode();
         var login = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
 
@@ -108,7 +108,7 @@ public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"api/users/login", loginDto);
+        var response = await _client.PostAsJsonAsync($"api/auth/login", loginDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

@@ -5,5 +5,6 @@ namespace backend.Services
     public interface IAuthService
     {
         Task<LoginResponseDto?> LoginAsync(LoginUserDTO dto);
+        Task<LoginResponseDto?> RefreshAsync(string refreshToken);
     }
 }

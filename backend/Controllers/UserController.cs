@@ -14,13 +14,11 @@ namespace backend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IAuthService _authService;
 
 
-        public UsersController(IUserService userService, IAuthService authService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
-            _authService = authService;
         }
 
         [HttpGet]
@@ -51,18 +49,6 @@ namespace backend.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
-        }
-
-        [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login(LoginUserDTO dto)
-        {
-            var tokens = await _authService.LoginAsync(dto);
-            if (tokens == null)
-            {
-                return Unauthorized(new { message = "Invalid credentials" });
-            }
-
-            return Ok(tokens);
         }
     }
 }

@@ -1,5 +1,6 @@
 using backend.Data;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories
 {
@@ -10,6 +11,18 @@ namespace backend.Repositories
         public RefreshTokenRepository(AppDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<RefreshToken?> GetByHashAsync(string tokenHash)
+        {
+            return await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
+        }
+
+        public async Task<List<RefreshToken>> GetActiveByFamilyAsync(Guid familyId)
+        {
+            return await _context.RefreshTokens
+                .Where(rt => rt.FamilyId == familyId && rt.IsActive)
+                .ToListAsync();
         }
 
         public async Task AddAsync(RefreshToken refreshToken)
