@@ -13,6 +13,7 @@ namespace backend.Services
         private readonly IUserRepository _repo;
         private readonly IPasswordService _passwordService;
         private readonly IUserMapper _userMapper;
+        private readonly ITokenService _tokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -20,11 +21,13 @@ namespace backend.Services
         /// <param name="repo">Repository used to perform CRUD operations for users.</param>
         /// <param name="passwordService">Service used for hashing and verifying passwords.</param>
         /// <param name="userMapper">Mapper used for converting between models and DTOs.</param>
-        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper)
+        /// <param name="tokenService">Service used for issuing access tokens.</param>
+        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper, ITokenService tokenService)
         {
             _repo = repo;
             _passwordService = passwordService;
             _userMapper = userMapper;
+            _tokenService = tokenService;
         }
 
         /// <summary>
@@ -81,9 +84,9 @@ namespace backend.Services
         /// </summary>
         /// <param name="dto">The login credentials.</param>
         /// <returns>
-        /// The user ID if authentication succeeds; otherwise <c>null</c>.
+        /// A signed access token if authentication succeeds; otherwise <c>null</c>.
         /// </returns>
-        public async Task<int?> LoginUserAsync(LoginUserDTO dto)
+        public async Task<string?> LoginUserAsync(LoginUserDTO dto)
         {
             var user = await _repo.GetByEmailAsync(dto.Email);
             if (user == null)
@@ -92,7 +95,7 @@ namespace backend.Services
             }
 
             var ok = _passwordService.VerifyPassword(user, user.PasswordHash, dto.Password);
-            return ok ? user.Id : null;
+            return ok ? _tokenService.CreateAccessToken(user) : null;
         }
     }
 }

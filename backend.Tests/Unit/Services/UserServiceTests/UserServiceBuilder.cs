@@ -18,6 +18,14 @@ public class UserServiceBuilder
     public Mock<IUserRepository> Repo { get; } = new();
     public Mock<IPasswordService> Password { get; } = new();
     public Mock<IUserMapper> Mapper { get; } = new();
+    public Mock<ITokenService> Token { get; } = new();
+
+    public const string FakeToken = "fake-access-token";
+
+    public UserServiceBuilder()
+    {
+        Token.Setup(t => t.CreateAccessToken(It.IsAny<User>())).Returns(FakeToken);
+    }
 
     /// <summary>
     /// Configures the repository mock to return a specific list of users.
@@ -119,7 +127,7 @@ public class UserServiceBuilder
     /// </summary>
     public UserService Build()
     {
-        return new UserService(Repo.Object, Password.Object, Mapper.Object);
+        return new UserService(Repo.Object, Password.Object, Mapper.Object, Token.Object);
     }
 }
 

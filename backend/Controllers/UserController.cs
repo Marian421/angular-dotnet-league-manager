@@ -52,15 +52,15 @@ namespace backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginUserDTO dto)
+        public async Task<ActionResult<LoginResponseDto>> Login(LoginUserDTO dto)
         {
-            var id = await _userService.LoginUserAsync(dto);
-            if (id == null)
+            var token = await _userService.LoginUserAsync(dto);
+            if (token == null)
             {
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            return Ok(new { message = "Login succesful", userId = (int)id });
+            return Ok(new LoginResponseDto { AccessToken = token });
         }
     }
 }

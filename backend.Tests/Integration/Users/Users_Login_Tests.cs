@@ -42,6 +42,10 @@ public class Users_Login_Tests : IClassFixture<CustomWebApplicationFactory>
         // Act
         var response = await _client.PostAsJsonAsync($"api/users/login", loginDto);
         response.EnsureSuccessStatusCode();
+        var login = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+
+        // Assert
+        login!.AccessToken.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
