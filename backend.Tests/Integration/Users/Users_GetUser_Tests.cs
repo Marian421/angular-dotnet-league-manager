@@ -34,6 +34,7 @@ public class Users_GetUser_Tests : IClassFixture<CustomWebApplicationFactory>
         response.EnsureSuccessStatusCode();
         var user = await response.Content.ReadFromJsonAsync<User>();
         int id = user!.Id;
+        await _client.LoginAsync("alice@example.com");
 
         // Act
         var getResponse = await _client.GetAsync($"api/users/{id}");

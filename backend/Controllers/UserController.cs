@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Validations;
 using backend.Services;
 using backend.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/users")] // api/users
 
@@ -35,6 +37,7 @@ namespace backend.Controllers
             return dto != null ? Ok(dto) : NotFound();
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<User>> CreateUser(RegisterUserDTO dto)
         {
