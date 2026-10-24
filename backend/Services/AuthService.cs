@@ -1,10 +1,11 @@
 using backend.DTOs;
+using backend.Models;
 using backend.Repositories;
 
 namespace backend.Services
 {
     /// <summary>
-    /// Provides authentication operations: logging in and refreshing tokens.
+    /// Provides authentication operations: logging in, refreshing tokens and logging out.
     /// </summary>
     public class AuthService : IAuthService
     {
@@ -85,11 +86,7 @@ namespace backend.Services
                 // A spent token came back, so two parties hold tokens from this login.
                 // Cancel whatever is still active in the family.
                 var family = await _refreshTokens.GetActiveByFamilyAsync(current.FamilyId);
-                foreach (var token in family)
-                {
-                    token.IsActive = false;
-                }
-                await _refreshTokens.SaveChangesAsync();
+                await DeactivateAsync(family);
 
                 _logger.LogWarning(
                     "Refresh refused: token reuse for user {UserId}, family {FamilyId} cancelled",
@@ -121,6 +118,49 @@ namespace backend.Services
                 AccessToken = _tokenService.CreateAccessToken(user),
                 RefreshToken = replacement.Token,
             };
+        }
+
+        /// <summary>
+        /// Ends the login the refresh token belongs to. Other logins of the same user are unaffected.
+        /// </summary>
+        /// <param name="refreshToken">A refresh token issued for the login that is ending.</param>
+        public async Task LogoutAsync(string refreshToken)
+        {
+            var current = await _refreshTokens.GetByHashAsync(_tokenService.HashRefreshToken(refreshToken));
+            if (current == null)
+            {
+                return;
+            }
+
+            var family = await _refreshTokens.GetActiveByFamilyAsync(current.FamilyId);
+            await DeactivateAsync(family);
+        }
+
+        /// <summary>
+        /// Ends every login of the user the refresh token belongs to.
+        /// </summary>
+        /// <param name="refreshToken">The caller's current refresh token.</param>
+        public async Task LogoutAllAsync(string refreshToken)
+        {
+            var current = await _refreshTokens.GetByHashAsync(_tokenService.HashRefreshToken(refreshToken));
+
+            // Only the current token of a live login may end all the others
+            if (current == null || !current.IsActive || current.ExpiresAt <= _timeProvider.GetUtcNow().UtcDateTime)
+            {
+                return;
+            }
+
+            var all = await _refreshTokens.GetActiveByUserAsync(current.UserId);
+            await DeactivateAsync(all);
+        }
+
+        private async Task DeactivateAsync(List<RefreshToken> tokens)
+        {
+            foreach (var token in tokens)
+            {
+                token.IsActive = false;
+            }
+            await _refreshTokens.SaveChangesAsync();
         }
     }
 }

@@ -40,5 +40,19 @@ namespace backend.Controllers
 
             return Ok(tokens);
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(RefreshTokenDto dto)
+        {
+            await _authService.LogoutAsync(dto.RefreshToken);
+            return NoContent();
+        }
+
+        [HttpPost("logout-all")]
+        public async Task<IActionResult> LogoutAll(RefreshTokenDto dto)
+        {
+            await _authService.LogoutAllAsync(dto.RefreshToken);
+            return NoContent();
+        }
     }
 }

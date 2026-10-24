@@ -25,6 +25,13 @@ namespace backend.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<RefreshToken>> GetActiveByUserAsync(int userId)
+        {
+            return await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId && rt.IsActive)
+                .ToListAsync();
+        }
+
         public async Task AddAsync(RefreshToken refreshToken)
         {
             await _context.RefreshTokens.AddAsync(refreshToken);
