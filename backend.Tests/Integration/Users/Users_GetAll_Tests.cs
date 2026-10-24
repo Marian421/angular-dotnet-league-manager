@@ -38,6 +38,8 @@ public class Users_GetAll_Tests : IClassFixture<CustomWebApplicationFactory>
             Password = "Password123"
         });
 
+        await _client.LoginAsync("alice@example.com");
+
         // Act
         var response = await _client.GetAsync("/api/users");
         var users = await response.Content.ReadFromJsonAsync<List<User>>();

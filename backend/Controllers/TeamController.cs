@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/teams")]
 
@@ -44,7 +45,6 @@ namespace backend.Controllers
             return Ok(team);
         }
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTeam([FromBody] TeamCreateDto dto)
         {

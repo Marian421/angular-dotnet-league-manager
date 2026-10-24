@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Validations;
 using backend.Services;
 using backend.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/users")] // api/users
 
@@ -35,6 +37,7 @@ namespace backend.Controllers
             return dto != null ? Ok(dto) : NotFound();
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<User>> CreateUser(RegisterUserDTO dto)
         {
@@ -49,18 +52,6 @@ namespace backend.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
-        }
-
-        [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login(LoginUserDTO dto)
-        {
-            var token = await _userService.LoginUserAsync(dto);
-            if (token == null)
-            {
-                return Unauthorized(new { message = "Invalid credentials" });
-            }
-
-            return Ok(new LoginResponseDto { AccessToken = token });
         }
     }
 }

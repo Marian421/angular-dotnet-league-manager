@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using backend.Models;
 using Microsoft.Extensions.Options;
@@ -39,6 +40,29 @@ namespace backend.Services
             };
 
             return new JsonWebTokenHandler().CreateToken(descriptor);
+        }
+
+        public IssuedRefreshToken CreateRefreshToken(int userId, Guid familyId)
+        {
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            var now = _timeProvider.GetUtcNow().UtcDateTime;
+
+            var entity = new RefreshToken
+            {
+                UserId = userId,
+                TokenHash = HashRefreshToken(token),
+                FamilyId = familyId,
+                IsActive = true,
+                CreatedAt = now,
+                ExpiresAt = now.AddDays(_settings.RefreshTokenDays),
+            };
+
+            return new IssuedRefreshToken(token, entity);
+        }
+
+        public string HashRefreshToken(string token)
+        {
+            return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
         }
     }
 }

@@ -16,6 +16,7 @@ namespace backend.Data
         public DbSet<ChampionshipTeam> ChampionshipTeams { get; set; }
         public DbSet<ChampionshipApplication> ChampionshipApplications { get; set; }
         public DbSet<Match> Matches { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,6 +84,19 @@ namespace backend.Data
               .WithMany()
               .HasForeignKey(ta => ta.UserId)
               .OnDelete(DeleteBehavior.Cascade);
+
+            // --------------------------
+            // RefreshToken -> User
+            // --------------------------
+            modelBuilder.Entity<RefreshToken>()
+              .HasOne(rt => rt.User)
+              .WithMany()
+              .HasForeignKey(rt => rt.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RefreshToken>()
+              .HasIndex(rt => rt.TokenHash)
+              .IsUnique();
 
             // --------------------------
             // Championship -> Owner

@@ -19,7 +19,8 @@ public class TokenServiceTests
         Key = Key,
         Issuer = "test-issuer",
         Audience = "test-audience",
-        AccessTokenMinutes = 15
+        AccessTokenMinutes = 15,
+        RefreshTokenDays = 90
     };
 
     private readonly User _user = new() { Id = 42, Name = "Alice", Email = "alice@example.com" };
@@ -92,6 +93,53 @@ public class TokenServiceTests
 
         // Assert
         result.IsValid.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CreateRefreshToken_Should_Store_Only_The_Hash_Of_The_Token()
+    {
+        // Arrange
+        var service = BuildService();
+
+        // Act
+        var issued = service.CreateRefreshToken(42, Guid.NewGuid());
+
+        // Assert
+        issued.Token.Should().NotBeNullOrEmpty();
+        issued.Entity.TokenHash.Should().NotBe(issued.Token);
+        issued.Entity.TokenHash.Should().Be(service.HashRefreshToken(issued.Token));
+    }
+
+    [Fact]
+    public void CreateRefreshToken_Should_Fill_In_Owner_Family_And_Expiry()
+    {
+        // Arrange
+        var service = BuildService();
+        var familyId = Guid.NewGuid();
+
+        // Act
+        var issued = service.CreateRefreshToken(42, familyId);
+
+        // Assert
+        issued.Entity.UserId.Should().Be(42);
+        issued.Entity.FamilyId.Should().Be(familyId);
+        issued.Entity.IsActive.Should().BeTrue();
+        issued.Entity.CreatedAt.Should().Be(Now.UtcDateTime);
+        issued.Entity.ExpiresAt.Should().Be(Now.UtcDateTime.AddDays(90));
+    }
+
+    [Fact]
+    public void CreateRefreshToken_Should_Return_A_Different_Token_Each_Time()
+    {
+        // Arrange
+        var service = BuildService();
+
+        // Act
+        var first = service.CreateRefreshToken(42, Guid.NewGuid());
+        var second = service.CreateRefreshToken(42, Guid.NewGuid());
+
+        // Assert
+        first.Token.Should().NotBe(second.Token);
     }
 
     private class FixedTimeProvider : TimeProvider

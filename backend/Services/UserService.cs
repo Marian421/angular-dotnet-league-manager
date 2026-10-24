@@ -6,14 +6,13 @@ using backend.Mappers;
 namespace backend.Services
 {
     /// <summary>
-    /// Provides user-related operations such as registration, login, and retrieval.
+    /// Provides user-related operations such as registration and retrieval.
     /// </summary>
     public class UserService : IUserService
     {
         private readonly IUserRepository _repo;
         private readonly IPasswordService _passwordService;
         private readonly IUserMapper _userMapper;
-        private readonly ITokenService _tokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -21,13 +20,11 @@ namespace backend.Services
         /// <param name="repo">Repository used to perform CRUD operations for users.</param>
         /// <param name="passwordService">Service used for hashing and verifying passwords.</param>
         /// <param name="userMapper">Mapper used for converting between models and DTOs.</param>
-        /// <param name="tokenService">Service used for issuing access tokens.</param>
-        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper, ITokenService tokenService)
+        public UserService(IUserRepository repo, IPasswordService passwordService, IUserMapper userMapper)
         {
             _repo = repo;
             _passwordService = passwordService;
             _userMapper = userMapper;
-            _tokenService = tokenService;
         }
 
         /// <summary>
@@ -77,25 +74,6 @@ namespace backend.Services
             await _repo.SaveChangesAsync();
 
             return user.Id;
-        }
-
-        /// <summary>
-        /// Attempts to authenticate a user using email and password.
-        /// </summary>
-        /// <param name="dto">The login credentials.</param>
-        /// <returns>
-        /// A signed access token if authentication succeeds; otherwise <c>null</c>.
-        /// </returns>
-        public async Task<string?> LoginUserAsync(LoginUserDTO dto)
-        {
-            var user = await _repo.GetByEmailAsync(dto.Email);
-            if (user == null)
-            {
-                return null;
-            }
-
-            var ok = _passwordService.VerifyPassword(user, user.PasswordHash, dto.Password);
-            return ok ? _tokenService.CreateAccessToken(user) : null;
         }
     }
 }
